@@ -16,7 +16,6 @@ const Login = () => {
       window.location.href = url;
     }, 800);
   };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -36,15 +35,18 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.token || data.access);
+        localStorage.setItem('user', JSON.stringify(data.user || {}));
         navigateTo('/dashboard');
       } else {
-        alert('Invalid credentials');
+        const errorData = await response.json();
+        alert(errorData.error || 'Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('An error occurred during login');
-    } finally {      setIsLoading(false);
+      alert('An error occurred during login. Please check if the backend is running.');
+    } finally {
+      setIsLoading(false);
     }
   };
     return (
@@ -101,8 +103,7 @@ const Login = () => {
               <div className="form-group">
                 <label htmlFor="email" className="form-label">Email</label>
                 <div className="input-wrapper">
-                  <div className="floating-label">Enter your email or username</div>
-                  <input
+                  <div className="floating-label">Enter your email or username</div>                  <input
                     type="text"
                     id="email"
                     className="form-input"
@@ -110,7 +111,6 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={(e) => {
                       e.target.parentElement.classList.add('focused');
-                      setHeaderVisible(false);
                     }}
                     onBlur={(e) => {
                       if (!e.target.value) {

@@ -16,7 +16,6 @@ const AdminLogin = () => {
       window.location.href = url;
     }, 800);
   };
-
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -36,15 +35,17 @@ const AdminLogin = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminToken', data.token || data.access);
+        localStorage.setItem('admin', JSON.stringify(data.admin || {}));
         localStorage.setItem('isAdmin', 'true');
         navigateTo('/admin-dashboard');
       } else {
-        setError('Invalid admin credentials');
+        const errorData = await response.json();
+        setError(errorData.error || 'Invalid admin credentials');
       }
     } catch (error) {
       console.error('Admin login error:', error);
-      setError('An error occurred during login');
+      setError('An error occurred during login. Please check if the backend is running.');
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +102,7 @@ const AdminLogin = () => {
               <div className="admin-form-group">
                 <label htmlFor="admin-username" className="admin-form-label">Admin Username</label>
                 <div className="admin-input-wrapper">
-                  <div className="admin-floating-label">Enter your admin username</div>
-                  <input
+                  <div className="admin-floating-label">Enter your admin username</div>                  <input
                     type="text"
                     id="admin-username"
                     className="admin-form-input"
@@ -110,7 +110,6 @@ const AdminLogin = () => {
                     onChange={(e) => setUsername(e.target.value)}
                     onFocus={(e) => {
                       e.target.parentElement.classList.add('focused');
-                      setHeaderVisible(false);
                     }}
                     onBlur={(e) => {
                       if (!e.target.value) {
