@@ -85,9 +85,15 @@ def jwt_login(request):
         refresh = RefreshToken.for_user(user)
 
         return Response({
+            'token': str(refresh.access_token),
             'access': str(refresh.access_token),
             'refresh': str(refresh),
-            'role': 'admin' if user.is_superuser else 'user'
+            'role': 'admin' if user.is_superuser else 'user',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            }
         })
     
     return Response({'error': 'Invalid credentials'}, status=400)
@@ -98,6 +104,108 @@ def protected_view(request):
     return Response({
         'message': f'Hello {request.user.username}',
         'role': 'admin' if request.user.is_superuser else 'user'
+    })
+
+
+# 📊 USER PROFILE / DASHBOARD API
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """Get user profile and dashboard data"""
+    if request.user.is_superuser:
+        return Response({'error': 'Admin users should use admin-dashboard endpoint'}, status=403)
+    
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'stats': {
+            'activeFleets': 3,
+            'totalTrips': 45,
+            'totalDistance': 2500,
+            'fuelExpense': 750.50
+        }
+    })
+
+
+# 👑 ADMIN DASHBOARD API
+@api_view(['POST'])
+def admin_jwt_login(request):
+    """Admin login with JWT"""
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None and user.is_superuser:
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'token': str(refresh.access_token),
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'admin': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            }
+        })
+    
+    return Response({'error': 'Invalid admin credentials'}, status=401)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_dashboard_data(request):
+    """Get admin dashboard data"""
+    if not request.user.is_superuser:
+        return Response({'error': 'Only admins can access this endpoint'}, status=403)
+    
+    from django.contrib.auth.models import User
+    
+    total_users = User.objects.filter(is_superuser=False).count()
+    admin_count = User.objects.filter(is_superuser=True).count()
+    
+    return Response({
+        'admin': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+        },
+        'stats': {
+            'totalUsers': total_users,
+            'totalFleets': 45,
+            'totalTrips': 2340,
+            'totalRevenue': 45600.75,
+            'activeVehicles': 180,
+            'systemStatus': 'Online'
+        },
+        'users': [
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'created_at': user.date_joined.isoformat()
+            }
+            for user in User.objects.filter(is_superuser=False)[:20]
+        ],
+        'fleets': [
+            {
+                'id': 1,
+                'name': 'Fleet A',
+                'owner': 'Company A',
+                'vehicle_count': 15
+            },
+            {
+                'id': 2,
+                'name': 'Fleet B',
+                'owner': 'Company B',
+                'vehicle_count': 22
+            }
+        ]
     })
 
     
