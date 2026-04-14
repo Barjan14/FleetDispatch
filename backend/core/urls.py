@@ -1,23 +1,25 @@
-"""
-URL configuration for core project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from core.views import (
+    jwt_login,                  # ✅ now exists in core/views.py
+    admin_jwt_login,            # ✅ now exists in core/views.py
+    admin_dashboard,
+    admin_users, admin_user_detail,
+    admin_vehicles, admin_vehicle_detail,
+    admin_fleets,
+    admin_bookings, admin_booking_action,
+    check_vehicle_availability,
+)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('accounts.urls')),
+    path('api/login/',                                jwt_login,                  name='api_login'),
+    path('api/admin-login/',                          admin_jwt_login,            name='api_admin_login'),
+    path('api/admin-dashboard/',                      admin_dashboard,            name='api_admin_dashboard'),
+    path('api/admin-users/',                          admin_users,                name='api_admin_users'),
+    path('api/admin-users/<int:id>/',                 admin_user_detail,          name='api_admin_user_detail'),
+    path('api/admin-vehicles/',                       admin_vehicles,             name='api_admin_vehicles'),
+    path('api/admin-vehicles/<int:id>/',              admin_vehicle_detail,       name='api_admin_vehicle_detail'),
+    path('api/admin-vehicles/<int:id>/availability/', check_vehicle_availability, name='api_vehicle_availability'),
+    path('api/admin-fleets/',                         admin_fleets,               name='api_admin_fleets'),
+    path('api/admin-bookings/',                       admin_bookings,             name='api_admin_bookings'),
+    path('api/admin-bookings/<int:id>/',              admin_booking_action,       name='api_admin_booking_action'),
 ]
