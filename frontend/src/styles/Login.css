@@ -121,13 +121,12 @@
 
 /* Floating Form Container */
 .login-form-container {
-  position: fixed;
+  position: absolute;
   top: 50%;
   left: 6%;
   transform: translateY(-50%);
   z-index: 50;
-  width: 90%;
-  max-width: 500px;
+  width: 500px;
   height: auto;
   overflow: visible;
   padding: 0;
@@ -225,7 +224,11 @@
   color: #333;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  margin-left: 12px;
+  padding-left: 12px;
+  margin: 0;
+  text-align: left;
+  display: block;
+  width: 100%;
 }
 
 /* Input Wrapper for Floating Labels */
@@ -241,41 +244,16 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #2d8659;
+  color: #999;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
   pointer-events: none;
-  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes popIn {
-  0% {
-    transform: translateY(-50%) scale(0.5);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(-50%) scale(1);
-    opacity: 1;
-  }
 }
 
 .input-wrapper.focused .floating-label {
-  animation: floatUp 0.4s ease forwards;
-}
-
-@keyframes floatUp {
-  0% {
-    transform: translateY(-50%) scale(1);
-    opacity: 1;
-    font-size: 14px;
-  }
-  100% {
-    transform: translateY(-35px) scale(0.85);
-    opacity: 0.7;
-    font-size: 12px;
-  }
+  opacity: 0;
 }
 
 .form-input {
@@ -306,6 +284,11 @@
 .form-input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 30px white inset !important;
   -webkit-text-fill-color: #000 !important;
+  -webkit-transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.form-input:-webkit-autofill::first-line {
+  font-size: 13px;
 }
 
 /* Password Input Wrapper */
@@ -481,59 +464,227 @@
   transform: translateY(0);
 }
 
-/* Responsive Design - Tablet */
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet and below */
 @media (max-width: 1024px) {
-  .login-form-container {
-    max-width: 500px;
-    width: 90%;
-    left: 6%;
-    transform: translateY(-50%);
-  }
+  /* Keep form container fixed size */
 }
 
-/* Responsive Design - Large Mobile & Small Tablet */
+/* Mobile devices */
 @media (max-width: 768px) {
   .login-form-container {
-    max-width: 500px;
-    width: 90%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 400px;
+  }
+
+  .login-card {
+    padding: 35px 25px;
+  }
+
+  .logo-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .logo-text {
+    font-size: 22px;
+  }
+
+  .login-form-box {
+    padding: 20px 16px;
+  }
+
+  .form-label {
+    font-size: 11px;
+  }
+
+  .form-input {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 10px;
+    margin-top: 2px;
+    padding-top: 6px;
+  }
+
+  .remember-checkbox input + span {
+    font-size: 11px;
+  }
+
+  .remember-checkbox input + span::before {
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    margin-right: 6px;
+  }
+
+  .forgot-password {
+    font-size: 10px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .login-car {
+    bottom: -80%;
+    left: -20%;
+    height: 295%;
   }
 }
 
-/* Responsive Design - Small Mobile */
-@media (max-width: 600px) {
-  .login-form-container {
-    max-width: 500px;
-    width: 90%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-}
-
-/* Extra Small Mobile */
+/* Small mobile devices */
 @media (max-width: 480px) {
   .login-form-container {
-    max-width: 500px;
-    width: 90%;
+    width: 320px;
     left: 50%;
     transform: translate(-50%, -50%);
   }
+
+  .login-card {
+    padding: 25px 18px;
+  }
+
+  .logo-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .logo-text {
+    font-size: 18px;
+  }
+
+  .login-form-box {
+    padding: 16px 12px;
+  }
+
+  .form-label {
+    font-size: 9px;
+  }
+
+  .form-input {
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+    font-size: 9px;
+    margin-top: 2px;
+    padding-top: 4px;
+  }
+
+  .remember-checkbox input + span {
+    font-size: 10px;
+  }
+
+  .remember-checkbox input + span::before {
+    width: 11px;
+    height: 11px;
+    min-width: 11px;
+    margin-right: 5px;
+    border: 1.5px solid #2d8659;
+  }
+
+  .forgot-password {
+    font-size: 9px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .company-logo {
+    width: 70px;
+    height: 70px;
+    top: 12px;
+    right: 15px;
+  }
 }
 
-/* Ultra Small Mobile - Portrait */
+/* Extra small mobile devices */
 @media (max-width: 360px) {
   .login-form-container {
-    max-width: 500px;
-    width: 90%;
+    width: 280px;
     left: 50%;
     transform: translate(-50%, -50%);
   }
-}
 
-/* Landscape Mode Adjustments */
-@media (max-height: 600px) {
-  .login-form-container {
-    max-width: 500px;
+  .login-card {
+    padding: 20px 14px;
+  }
+
+  .logo-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .logo-text {
+    font-size: 16px;
+  }
+
+  .login-form-box {
+    padding: 14px 10px;
+  }
+
+  .form-label {
+    font-size: 8px;
+  }
+
+  .form-input {
+    padding: 6px 6px;
+    font-size: 10px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    font-size: 8px;
+    margin-top: 2px;
+    padding-top: 3px;
+    border-top: none;
+  }
+
+  .remember-checkbox input + span {
+    font-size: 9px;
+  }
+
+  .remember-checkbox input + span::before {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    margin-right: 4px;
+    border: 1.5px solid #2d8659;
+  }
+
+  .forgot-password {
+    font-size: 8px;
+  }
+
+  .btn {
+    padding: 7px 10px;
+    font-size: 10px;
+    margin-top: 6px;
+  }
+
+  .company-logo {
+    width: 60px;
+    height: 60px;
+    top: 10px;
+    right: 10px;
   }
 }
+
+

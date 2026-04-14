@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -10,11 +12,11 @@ const Login = () => {
   const [exitAnimation, setExitAnimation] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
 
-  const navigateTo = (url) => {
+  const navigateTo = (path) => {
     setExitAnimation(true);
     setTimeout(() => {
-      window.location.href = url;
-    }, 800);
+      navigate(path);
+    }, 300);
   };
   const handleLogin = async (e) => {
     e.preventDefault();
