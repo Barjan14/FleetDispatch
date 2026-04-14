@@ -1,4 +1,3 @@
-﻿/* filepath: c:\Users\Acer\FleetDispatch\frontend\src\styles\AdminLogin.css */
 /* Admin Login Container */
 .admin-login-container {
   height: 100vh;
@@ -61,7 +60,7 @@
   padding-top: 8%;
 }
 
-/* Rotating Waving Circle around Admin Car */
+/* Rotating Cogwheel with 8 Teeth around Admin Car */
 .car-circle-wrapper-admin {
   position: relative;
   width: 100%;
@@ -75,9 +74,55 @@
   right: -50px;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle at center, rgba(45, 134, 89, 0.8) 0%, rgba(45, 134, 89, 0.8) 100%);
+  /* Cogwheel with 8 teeth - matching circle radius */
+  background: 
+    conic-gradient(from 0deg,
+      #FCEEB1 0deg 20deg,
+      transparent 20deg 45deg,
+      #FCEEB1 45deg 65deg,
+      transparent 65deg 90deg,
+      #FCEEB1 90deg 110deg,
+      transparent 110deg 135deg,
+      #FCEEB1 135deg 155deg,
+      transparent 155deg 180deg,
+      #FCEEB1 180deg 200deg,
+      transparent 200deg 225deg,
+      #FCEEB1 225deg 245deg,
+      transparent 245deg 270deg,
+      #FCEEB1 270deg 290deg,
+      transparent 290deg 315deg,
+      #FCEEB1 315deg 335deg,
+      transparent 335deg 360deg
+    );
+  border-radius: 50%;
+  animation: rotateCogwheel 8s linear infinite;
+  pointer-events: none;
+  mask-image: radial-gradient(circle, transparent 0%, transparent 35%, black 35%, black 100%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0%, transparent 35%, black 35%, black 100%);
+}
+
+.car-circle-wrapper-admin::after {
+  content: '';
+  position: absolute;
+  bottom: 03%;
+  right: -50px;
+  width: 500px;
+  height: 500px;
+  /* Circle base with matching shape */
+  background: radial-gradient(circle at 50% 50%, #FCEEB1 0%, #FCEEB1 100%);
   border-radius: 50%;
   pointer-events: none;
+  z-index: -1;
+  clip-path: circle(35%);
+}
+
+@keyframes rotateCogwheel {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .background-image-wrapper {
@@ -99,8 +144,8 @@
 /* Admin Icon Overlay */
 .admin-icon-overlay {
   position: absolute;
-  top: 40px;
-  left: 40px;
+  top: 15%;
+  left: 43%;
   width: 120px;
   height: 120px;
   z-index: 10;
@@ -364,14 +409,14 @@
 }
 
 .admin-btn-primary {
-  background: linear-gradient(135deg, #67c442 0%, #5cb340 100%);
+  background: linear-gradient(135deg, #F5CB15 0%, #D4A612 100%);
   color: white;
-  box-shadow: 0 8px 20px rgba(103, 196, 66, 0.25);
+  box-shadow: 0 8px 20px rgba(245, 203, 21, 0.25);
 }
 
 .admin-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(103, 196, 66, 0.4);
+  box-shadow: 0 15px 35px rgba(245, 203, 21, 0.4);
 }
 
 .admin-btn-primary:active:not(:disabled) {
