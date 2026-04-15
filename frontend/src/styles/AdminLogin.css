@@ -10,6 +10,7 @@
   overflow: hidden;
   margin: 0;
   padding: 0;
+  z-index: 1;
 }
 
 /* Company Logo */
@@ -202,13 +203,13 @@
 .admin-logo-icon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 100%);
+  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
   border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 12px;
-  box-shadow: 0 10px 30px rgba(26, 95, 63, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 98, 5, 0.3);
 }
 
 .admin-logo-svg {
@@ -409,14 +410,14 @@
 }
 
 .admin-btn-primary {
-  background: linear-gradient(135deg, #F5CB15 0%, #D4A612 100%);
+  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
   color: white;
-  box-shadow: 0 8px 20px rgba(245, 203, 21, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 98, 5, 0.25);
 }
 
 .admin-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(245, 203, 21, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
 }
 
 .admin-btn-primary:active:not(:disabled) {

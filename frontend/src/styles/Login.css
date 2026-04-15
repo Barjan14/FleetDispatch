@@ -10,6 +10,7 @@
   overflow: hidden;
   margin: 0;
   padding: 0;
+  z-index: 1;
 }
 
 /* Company Logo */
@@ -166,12 +167,12 @@
 .logo-icon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #1a5f3f 0%, #2d8659 100%);
+  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
   border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 30px rgba(26, 95, 63, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 98, 5, 0.3);
 }
 
 .logo-svg {
@@ -430,14 +431,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #67c442 0%, #5cb340 100%);
+  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
   color: white;
-  box-shadow: 0 8px 20px rgba(103, 196, 66, 0.25);
+  box-shadow: 0 8px 20px rgba(0, 98, 5, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(103, 196, 66, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -450,14 +451,14 @@
 }
 
 .btn-admin {
-  background: linear-gradient(135deg, #67c442 0%, #5cb340 100%);
+  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
   color: white;
-  box-shadow: 0 10px 25px rgba(103, 196, 66, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 98, 5, 0.3);
 }
 
 .btn-admin:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(103, 196, 66, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
 }
 
 .btn-admin:active {
