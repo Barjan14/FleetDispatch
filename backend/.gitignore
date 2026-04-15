@@ -58,3 +58,18 @@ htmlcov/
 # OS
 Thumbs.db
 .DS_Store
+
+# Misc
+*.bak
+*.tmp
+.cache/
+pip/
+.pip/
+
+# Node (if using npm)
+node_modules/
+package-lock.json
+
+# Backup files
+*.backup
+*.swp
