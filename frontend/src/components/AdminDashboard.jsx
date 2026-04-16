@@ -35,7 +35,7 @@ const css = `
   table{width:100%;border-collapse:collapse;}
   thead tr{background:#f8fafc;}
   th{padding:11px 20px;text-align:left;font-size:11px;font-weight:700;color:${C.muted};text-transform:uppercase;letter-spacing:.5px;}
-  td{padding:13px 20px;font-size:14px;border-top:1px solid ${C.border};}
+  td{padding:13px 20px;font-size:14px;border-top:1px solid ${C.border};vertical-align:middle;}
   tr:hover td{background:#f8fafc;}
   .btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:opacity .15s;}
   .btn:hover{opacity:.85;}
@@ -63,11 +63,18 @@ const css = `
   .fg label{font-size:13px;font-weight:500;color:${C.muted};}
   .fg input,.fg select,.fg textarea{padding:9px 12px;border:1px solid ${C.border};border-radius:8px;font-size:14px;outline:none;font-family:inherit;transition:border .15s;}
   .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:${C.primary};}
+  .fg input[type=file]{padding:7px 10px;cursor:pointer;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .err{background:${C.dangerL};color:${C.danger};padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;}
   .ok{background:${C.successL};color:${C.success};padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;}
   .empty{text-align:center;color:${C.muted};padding:32px;font-size:14px;}
   .acts{display:flex;gap:6px;flex-wrap:wrap;}
+  .vthumb{width:56px;height:44px;object-fit:cover;border-radius:7px;border:1px solid ${C.border};display:block;}
+  .vthumb-empty{width:56px;height:44px;border-radius:7px;background:#f1f5f9;border:1px solid ${C.border};display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .img-upload-area{border:2px dashed ${C.border};border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border .15s;position:relative;}
+  .img-upload-area:hover{border-color:${C.primary};}
+  .img-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .img-preview{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-top:8px;border:1px solid ${C.border};}
   @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:16px;}.sgrid{grid-template-columns:1fr 1fr;}}
 `;
 
@@ -103,14 +110,19 @@ export default function AdminDashboard() {
   const [fleets, setFleets]       = useState([]);
   const [bookings, setBookings]   = useState([]);
 
-  // Modals
-  const [modal, setModal]   = useState(''); // 'addVehicle'|'editVehicle'|'addUser'|'editUser'|'booking'
-  const [sel, setSel]       = useState(null);
+  const [modal, setModal] = useState('');
+  const [sel, setSel]     = useState(null);
 
-  // Vehicle form
-  const [vForm, setVForm] = useState({ name:'', plate_number:'', model:'', year:'', condition:'Good' });
-  // User form
-  const [uForm, setUForm] = useState({ username:'', email:'', password:'', is_staff:false, profile:{ employee_id:'', department:'', phone:'' } });
+  // Vehicle form — includes image (File) and preview (blob URL) and existingImage (URL from server)
+  const [vForm, setVForm] = useState({
+    name:'', plate_number:'', model:'', year:'', condition:'Good',
+    image: null, preview: null, existingImage: null
+  });
+
+  const [uForm, setUForm] = useState({
+    username:'', email:'', password:'', is_staff:false,
+    profile:{ employee_id:'', department:'', phone:'' }
+  });
 
   const showToast = (msg, type='ok') => {
     setToast({ msg, type });
@@ -150,24 +162,63 @@ export default function AdminDashboard() {
 
   // ── Vehicle CRUD ──────────────────────────────────────────
   const openAddVehicle = () => {
-    setVForm({ name:'', plate_number:'', model:'', year:'', condition:'Good' });
+    setVForm({ name:'', plate_number:'', model:'', year:'', condition:'Good', image:null, preview:null, existingImage:null });
     setModal('addVehicle');
   };
+
   const openEditVehicle = (v) => {
-    setVForm({ name:v.name, plate_number:v.plate_number, model:v.model||'', year:v.year||'', condition:v.condition||'Good' });
-    setSel(v); setModal('editVehicle');
+    setVForm({
+      name: v.name,
+      plate_number: v.plate_number,
+      model: v.model || '',
+      year: v.year || '',
+      condition: v.condition || 'Good',
+      image: null,
+      preview: null,
+      existingImage: v.image_url || null   // ← show current image from server
+    });
+    setSel(v);
+    setModal('editVehicle');
   };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setVForm(f => ({
+      ...f,
+      image: file,
+      preview: URL.createObjectURL(file),
+      existingImage: null   // new image replaces old preview
+    }));
+  };
+
   const saveVehicle = async () => {
     const isEdit = modal === 'editVehicle';
     const url    = isEdit ? `${API}/admin-vehicles/${sel.id}/` : `${API}/admin-vehicles/`;
     const method = isEdit ? 'PUT' : 'POST';
+
+    const formData = new FormData();
+    formData.append('name',         vForm.name);
+    formData.append('plate_number', vForm.plate_number);
+    formData.append('model',        vForm.model);
+    formData.append('year',         vForm.year);
+    formData.append('condition',    vForm.condition);
+    if (vForm.image) {
+      formData.append('image', vForm.image);
+    }
+
     try {
-      const res = await fetch(url, { method, headers:headers(), body:JSON.stringify(vForm) });
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization:`Bearer ${localStorage.getItem('adminToken')}` },
+        body: formData,
+      });
       if (!res.ok) { const e = await res.json(); throw new Error(JSON.stringify(e)); }
       showToast(isEdit ? 'Vehicle updated!' : 'Vehicle added!');
       closeModal(); fetchAll();
     } catch(e) { showToast('Error: ' + e.message, 'err'); }
   };
+
   const deleteVehicle = async (id) => {
     if (!window.confirm('Delete this vehicle?')) return;
     await fetch(`${API}/admin-vehicles/${id}/`, { method:'DELETE', headers:headers() });
@@ -218,7 +269,15 @@ export default function AdminDashboard() {
     } catch(e) { showToast('Error: ' + e.message, 'err'); }
   };
 
-  if (loading) return <><style>{css}</style><div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:C.muted}}>Loading…</div></>;
+  if (loading) return (
+    <><style>{css}</style>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:C.muted}}>
+      Loading…
+    </div></>
+  );
+
+  // The image to show in modal: new preview or existing server image
+  const modalImageSrc = vForm.preview || vForm.existingImage;
 
   return (
     <div className="root">
@@ -231,11 +290,21 @@ export default function AdminDashboard() {
           <div key={n.key} className={`nav ${tab===n.key?'on':''}`} onClick={()=>setTab(n.key)}>
             <span style={{fontSize:18}}>{n.icon}</span>{n.label}
             {n.key==='bookings' && stats.pendingBookings > 0 &&
-              <span style={{marginLeft:'auto',background:'#ef4444',borderRadius:'50%',width:18,height:18,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700}}>{stats.pendingBookings}</span>
+              <span style={{marginLeft:'auto',background:'#ef4444',borderRadius:'50%',width:18,height:18,
+                display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700}}>
+                {stats.pendingBookings}
+              </span>
             }
           </div>
         ))}
         <div className="sfooter">FleetDispatch v2.0</div>
+        <div className="nav" style={{color:'#fca5a5'}} onClick={() => {
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('isAdmin');
+          navigate('/admin-login');
+        }}>
+          🚪 Logout
+        </div>
       </aside>
 
       {/* Main */}
@@ -275,17 +344,37 @@ export default function AdminDashboard() {
               <button className="btn bp" onClick={openAddVehicle}>+ Add Vehicle</button>
             </div>
             <table>
-              <thead><tr><th>ID</th><th>Name</th><th>Plate</th><th>Model/Year</th><th>Condition</th><th>Available</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Image</th><th>ID</th><th>Name</th><th>Plate</th>
+                  <th>Model/Year</th><th>Condition</th><th>Available</th><th>Actions</th>
+                </tr>
+              </thead>
               <tbody>
-                {vehicles.length===0 && <tr><td colSpan={7} className="empty">No vehicles yet.</td></tr>}
+                {vehicles.length===0 && <tr><td colSpan={8} className="empty">No vehicles yet.</td></tr>}
                 {vehicles.map(v=>(
                   <tr key={v.id}>
+                    {/* ── IMAGE CELL ── */}
+                    <td>
+                      {v.image_url
+                        ? <img src={v.image_url} alt={v.name} className="vthumb"/>
+                        : <div className="vthumb-empty">🚗</div>
+                      }
+                    </td>
                     <td style={{color:C.muted}}>#{v.id}</td>
                     <td style={{fontWeight:500}}>{v.name}</td>
-                    <td><code style={{background:'#f1f5f9',padding:'2px 8px',borderRadius:4,fontSize:13}}>{v.plate_number}</code></td>
+                    <td>
+                      <code style={{background:'#f1f5f9',padding:'2px 8px',borderRadius:4,fontSize:13}}>
+                        {v.plate_number}
+                      </code>
+                    </td>
                     <td style={{color:C.muted}}>{v.model} {v.year}</td>
                     <td><span className={`badge ${condBadge(v.condition)}`}>{v.condition}</span></td>
-                    <td><span className={`badge ${v.is_available?'b-approved':'b-rejected'}`}>{v.is_available?'Yes':'No'}</span></td>
+                    <td>
+                      <span className={`badge ${v.is_available?'b-approved':'b-rejected'}`}>
+                        {v.is_available?'Yes':'No'}
+                      </span>
+                    </td>
                     <td className="acts">
                       <button className="btn bp" onClick={()=>openEditVehicle(v)}>Edit</button>
                       <button className="btn bd" onClick={()=>deleteVehicle(v.id)}>Delete</button>
@@ -329,7 +418,9 @@ export default function AdminDashboard() {
         {/* ── BOOKINGS ── */}
         {tab==='bookings' && (
           <div className="card">
-            <div className="ch"><h3>Bookings <span className="badge b-pending" style={{marginLeft:8}}>{bookings.filter(b=>b.status==='Pending').length} pending</span></h3></div>
+            <div className="ch">
+              <h3>Bookings <span className="badge b-pending" style={{marginLeft:8}}>{bookings.filter(b=>b.status==='Pending').length} pending</span></h3>
+            </div>
             <table>
               <thead><tr><th>ID</th><th>Employee</th><th>Vehicle</th><th>Start</th><th>End</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
@@ -385,20 +476,61 @@ export default function AdminDashboard() {
       {(modal==='addVehicle'||modal==='editVehicle') && (
         <div className="overlay" onClick={closeModal}>
           <div className="mbox" onClick={e=>e.stopPropagation()}>
-            <div className="mh">{modal==='addVehicle'?'Add Vehicle':'Edit Vehicle'}<button className="btn bg" style={{padding:'4px 10px'}} onClick={closeModal}>✕</button></div>
+            <div className="mh">
+              {modal==='addVehicle'?'Add Vehicle':'Edit Vehicle'}
+              <button className="btn bg" style={{padding:'4px 10px'}} onClick={closeModal}>✕</button>
+            </div>
             <div className="mc">
               <div className="row2">
-                <div className="fg"><label>Vehicle Name *</label><input value={vForm.name} onChange={e=>setVForm({...vForm,name:e.target.value})} placeholder="e.g. Toyota Hilux"/></div>
-                <div className="fg"><label>Plate Number *</label><input value={vForm.plate_number} onChange={e=>setVForm({...vForm,plate_number:e.target.value})} placeholder="e.g. ABC-1234"/></div>
+                <div className="fg">
+                  <label>Vehicle Name *</label>
+                  <input value={vForm.name} onChange={e=>setVForm({...vForm,name:e.target.value})} placeholder="e.g. Toyota Hilux"/>
+                </div>
+                <div className="fg">
+                  <label>Plate Number *</label>
+                  <input value={vForm.plate_number} onChange={e=>setVForm({...vForm,plate_number:e.target.value})} placeholder="e.g. ABC-1234"/>
+                </div>
               </div>
               <div className="row2">
-                <div className="fg"><label>Model</label><input value={vForm.model} onChange={e=>setVForm({...vForm,model:e.target.value})} placeholder="e.g. Hilux Revo"/></div>
-                <div className="fg"><label>Year</label><input type="number" value={vForm.year} onChange={e=>setVForm({...vForm,year:e.target.value})} placeholder="e.g. 2022"/></div>
+                <div className="fg">
+                  <label>Model</label>
+                  <input value={vForm.model} onChange={e=>setVForm({...vForm,model:e.target.value})} placeholder="e.g. Hilux Revo"/>
+                </div>
+                <div className="fg">
+                  <label>Year</label>
+                  <input type="number" value={vForm.year} onChange={e=>setVForm({...vForm,year:e.target.value})} placeholder="e.g. 2022"/>
+                </div>
               </div>
-              <div className="fg"><label>Condition</label>
+              <div className="fg">
+                <label>Condition</label>
                 <select value={vForm.condition} onChange={e=>setVForm({...vForm,condition:e.target.value})}>
                   <option>Good</option><option>Fair</option><option>Under Repair</option><option>Out of Service</option>
                 </select>
+              </div>
+
+              {/* ── IMAGE UPLOAD ── */}
+              <div className="fg">
+                <label>Vehicle Image {modal==='editVehicle' && '(leave empty to keep current)'}</label>
+                <div className="img-upload-area">
+                  <input type="file" accept="image/*" onChange={handleImageChange}/>
+                  {modalImageSrc
+                    ? <img src={modalImageSrc} alt="preview" className="img-preview"/>
+                    : <div style={{padding:'20px 0',color:C.muted,fontSize:13}}>
+                        <div style={{fontSize:28,marginBottom:6}}>📷</div>
+                        Click or drag an image here
+                      </div>
+                  }
+                </div>
+                {modalImageSrc && (
+                  <button
+                    type="button"
+                    className="btn bg"
+                    style={{fontSize:12,padding:'4px 10px',marginTop:4,alignSelf:'flex-start'}}
+                    onClick={() => setVForm(f=>({...f, image:null, preview:null, existingImage:null}))}
+                  >
+                    ✕ Remove image
+                  </button>
+                )}
               </div>
             </div>
             <div className="mf">
@@ -413,7 +545,10 @@ export default function AdminDashboard() {
       {(modal==='addUser'||modal==='editUser') && (
         <div className="overlay" onClick={closeModal}>
           <div className="mbox" onClick={e=>e.stopPropagation()}>
-            <div className="mh">{modal==='addUser'?'Add User':'Edit User'}<button className="btn bg" style={{padding:'4px 10px'}} onClick={closeModal}>✕</button></div>
+            <div className="mh">
+              {modal==='addUser'?'Add User':'Edit User'}
+              <button className="btn bg" style={{padding:'4px 10px'}} onClick={closeModal}>✕</button>
+            </div>
             <div className="mc">
               <div className="row2">
                 <div className="fg"><label>Username *</label><input value={uForm.username} onChange={e=>setUForm({...uForm,username:e.target.value})} placeholder="johndoe"/></div>

@@ -33,9 +33,12 @@ class Vehicle(models.Model):
     year         = models.IntegerField(null=True, blank=True)
     condition    = models.CharField(max_length=50, choices=CONDITION_CHOICES, default='Good')
     is_available = models.BooleanField(default=True)
+    image        = models.ImageField(upload_to='vehicles/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.plate_number})"
+
+
 
 
 class VehicleBooking(models.Model):

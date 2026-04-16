@@ -48,11 +48,20 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 class VehicleSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
-        model = Vehicle
+        model  = Vehicle
         fields = '__all__'
 
-
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        elif obj.image:
+            return f'http://localhost:8000{obj.image.url}'
+        return None
+        
 class FleetSerializer(serializers.ModelSerializer):
     vehicle_count = serializers.SerializerMethodField()
 
