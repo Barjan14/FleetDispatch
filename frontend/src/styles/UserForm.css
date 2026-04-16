@@ -1,0 +1,449 @@
+/* =========================================================
+   GLOBAL COLOR VARIABLES - Accessible Green Theme
+   ========================================================= */
+:root {
+  /* Primary Brand Colors */
+  --primary-dark: #134e33;     /* Deep green for header and hover states */
+  --primary: #1f7a4d;          /* Main green */
+  --primary-light: #2f9e6f;    /* Accent green */
+  --accent-success: #4caf50;   /* Success indicator */
+
+  /* Backgrounds */
+  --bg-light: #f8faf9;         /* Soft background for sections */
+  --bg-white: #ffffff;
+
+  /* Borders */
+  --border: #d1d5db;           /* Stronger border for clarity */
+
+  /* Text Colors */
+  --text-dark: #0f172a;        /* Main readable text */
+  --text-label: #1f2937;       /* Labels */
+  --text-muted: #4b5563;       /* Secondary text */
+  --text-on-primary: #ffffff;  /* Text on dark backgrounds */
+
+  /* Status Colors */
+  --success-bg: #e8f5e9;
+  --success-text: #1b5e20;
+
+  /* Focus State */
+  --focus-ring: rgba(31, 122, 77, 0.25);
+}
+
+/* =========================================================
+   FULL-SCREEN CONTAINER
+   ========================================================= */
+.fd-container {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   FULL-SCREEN CARD
+   ========================================================= */
+.fd-card {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-white);
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  overflow: hidden;
+  animation: cardIn 0.4s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.fd-header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centers the whole group */
+  gap: 14px;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-dark) 0%,
+    var(--primary) 50%,
+    var(--primary-light) 100%
+  );
+  position: relative; /* IMPORTANT for badge positioning */
+}
+
+.fd-header-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fd-header-icon {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-primary);
+}
+
+.fd-header-text h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-on-primary);
+  letter-spacing: 0.01em;
+}
+
+.fd-header-text p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 2px;
+  font-family: monospace;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge--dispatched {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--success-text);
+}
+
+/* =========================================================
+   SUCCESS BANNER
+   ========================================================= */
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 1.5rem;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 1px solid #c8e6c9;
+  animation: slideDown 0.3s ease both;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   BODY
+   ========================================================= */
+.fd-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 1.5rem;
+  background: var(--bg-white);
+}
+
+/* =========================================================
+   SECTION LABEL
+   ========================================================= */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-family: monospace;
+  margin-bottom: 0.75rem;
+}
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  border: none;
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 520px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   FORM FIELDS
+   ========================================================= */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.field-hint {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-muted);
+}
+
+input,
+select,
+textarea {
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background: var(--bg-white);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ROUTE INDICATOR
+   ========================================================= */
+.route-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot--origin {
+  background: var(--primary-light);
+}
+
+.dot--dest {
+  background: #ef4444; /* Red retained for destination clarity */
+}
+
+.route-label {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.route-line {
+  flex: 1;
+  background: var(--border);
+}
+
+/* =========================================================
+   VERIFICATION BOX
+   ========================================================= */
+.verify-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 1rem 1.25rem;
+  background: var(--bg-light);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.verify-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.check-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.check-label {
+  font-size: 13px;
+  color: var(--text-label);
+  transition: color 0.15s;
+}
+
+.check-label--done {
+  color: var(--primary);
+  text-decoration: line-through;
+  text-decoration-color: rgba(76, 175, 80, 0.5);
+}
+
+/* =========================================================
+   SIGNATURE AREA
+   ========================================================= */
+.sig-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 1rem;
+  min-height: 56px;
+  background: var(--bg-white);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.fd-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--bg-light);
+  border-top: 1px solid var(--border);
+}
+
+.footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.btn {
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, transform 0.1s, opacity 0.15s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn--ghost:hover {
+  color: var(--primary-dark);
+  background: rgba(31, 122, 77, 0.08);
+}
+
+.btn--outline {
+  background: var(--bg-white);
+  color: var(--primary-dark);
+  border: 1px solid var(--border);
+}
+
+.btn--outline:hover {
+  border-color: var(--primary);
+  background: rgba(31, 122, 77, 0.05);
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border: 1px solid var(--primary);
+}
+
+.btn--primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* =========================================================
+   FOOTER HINT
+   ========================================================= */
+.form-hint {
+  font-size: 12px;
+  font-family: monospace;
+  color: var(--text-muted);
+  text-align: center;
+}
