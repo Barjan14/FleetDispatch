@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/AdminDashboard.css';
+import '../styles/AdminDashboard.v2.css';
 
 const API = 'http://localhost:8000/api';
+const ADMIN = `${API}`;
 
 function condBadge(c) {
   const map = { Good:'b-good', Fair:'b-fair', 'Under Repair':'b-repair', 'Out of Service':'b-out' };
@@ -29,12 +30,53 @@ export default function AdminDashboard() {
   const [toast, setToast] = useState({ msg:'', type:'' });
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  const [vehicleSort, setVehicleSort] = useState('name_asc');
+
   const [adminUser, setAdminUser] = useState({});
-  const [stats, setStats] = useState({});
-  const [vehicles, setVehicles] = useState([]);
+  const [stats, setStats] = useState({});  const [vehicles, setVehicles] = useState([]);
   const [users, setUsers] = useState([]);
   const [fleets, setFleets] = useState([]);
   const [bookings, setBookings] = useState([]);
+
+  const sortedVehicles = React.useMemo(() => {
+    const list = [...vehicles];
+    switch (vehicleSort) {
+      case 'name_desc':
+        list.sort((a, b) => String(b.name || '').localeCompare(String(a.name || '')));
+        break;
+      case 'condition':
+        list.sort((a, b) => String(a.condition || '').localeCompare(String(b.condition || '')));
+        break;
+      case 'available':
+        list.sort((a, b) => Number(Boolean(b.is_available)) - Number(Boolean(a.is_available)));
+        break;
+      case 'newest':
+        list.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        break;
+      case 'name_asc':
+      default:
+        list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+        break;
+    }
+    return list;
+  }, [vehicles, vehicleSort]);
+
+  const cycleVehicleSort = () => {
+    const order = ['name_asc', 'name_desc', 'condition', 'available', 'newest'];
+    const idx = order.indexOf(vehicleSort);
+    const next = order[(idx + 1) % order.length];
+    setVehicleSort(next);
+
+    const label = {
+      name_asc: 'Name (A→Z)',
+      name_desc: 'Name (Z→A)',
+      condition: 'Condition',
+      available: 'Availability',
+      newest: 'Newest',
+    }[next];
+
+    showToast(`Sorted by: ${label}`, 'ok');
+  };
 
   const [modal, setModal] = useState('');
   const [sel, setSel] = useState(null);
@@ -63,12 +105,14 @@ export default function AdminDashboard() {
     try {
       const h = headers();
       const [rD, rV, rU, rF, rB] = await Promise.all([
-        fetch(`${API}/admin/dashboard/`, { headers: h }),
-        fetch(`${API}/admin/vehicles/`,  { headers: h }),
-        fetch(`${API}/admin/users/`,     { headers: h }),
-        fetch(`${API}/admin/fleets/`,    { headers: h }),
-        fetch(`${API}/admin/bookings/`,  { headers: h }),
-      ]);
+        fetch(`${ADMIN}/admin-dashboard/`, { headers: h }),
+        fetch(`${ADMIN}/admin-vehicles/`,  { headers: h }),
+        fetch(`${ADMIN}/admin-users/`,     { headers: h }),
+        fetch(`${ADMIN}/admin-fleets/`,    { headers: h }),
+        fetch(`${ADMIN}/admin-bookings/`,  { headers: h }),
+      ]);      if ([rD, rV, rU, rF, rB].some(r => r.status === 401)) {
+        throw new Error('TOKEN_EXPIRED');
+      }
 
       if (!rD.ok || !rV.ok || !rU.ok || !rF.ok || !rB.ok) {
         throw new Error('One or more API calls failed');
@@ -77,15 +121,23 @@ export default function AdminDashboard() {
       const [d, v, u, f, b] = await Promise.all([
         rD.json(), rV.json(), rU.json(), rF.json(), rB.json()
       ]);
-      
-      setAdminUser(d.admin || {});
+        setAdminUser(d.admin || {});
       setStats(d.stats || {});
-      setVehicles(v || []);
+      setVehicles((v || []).map(x => x));
       setUsers(u || []);
       setFleets(f || []);
-      setBookings(b || []);
-    } catch(e) {
+      setBookings(b || []);    } catch(e) {
       console.error('Error fetching data:', e);
+
+      const msg = String(e?.message || '');
+      if (msg === 'TOKEN_EXPIRED' || /token_not_valid|expired|invalid token/i.test(msg)) {
+        showToast('Session expired. Please log in again.', 'err');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('isAdmin');
+        navigate('/admin-login');
+        return;
+      }
+
       showToast('Failed to load data. Is the server running?', 'err');
     } finally { 
       setLoading(false); 
@@ -120,7 +172,7 @@ export default function AdminDashboard() {
 
   const saveVehicle = async () => {
     const isEdit = modal === 'editVehicle';
-    const url = isEdit ? `${API}/admin/vehicles/${sel.id}/` : `${API}/admin/vehicles/`;
+    const url = isEdit ? `${ADMIN}/admin-vehicles/${sel.id}/` : `${ADMIN}/admin-vehicles/`;
     const method = isEdit ? 'PUT' : 'POST';
     try {
       const res = await fetch(url, { method, headers: headers(), body: JSON.stringify(vForm) });
@@ -139,7 +191,7 @@ export default function AdminDashboard() {
   const deleteVehicle = async (id) => {
     if (!window.confirm('Delete this vehicle?')) return;
     try {
-      const res = await fetch(`${API}/admin/vehicles/${id}/`, { method:'DELETE', headers: headers() });
+      const res = await fetch(`${ADMIN}/admin-vehicles/${id}/`, { method:'DELETE', headers: headers() });
       if (!res.ok) throw new Error('Failed to delete');
       showToast('Vehicle deleted.');
       fetchAll();
@@ -175,7 +227,7 @@ export default function AdminDashboard() {
       return;
     }
     const isEdit = modal === 'editUser';
-    const url = isEdit ? `${API}/admin/users/${sel.id}/` : `${API}/admin/users/`;
+    const url = isEdit ? `${ADMIN}/admin-users/${sel.id}/` : `${ADMIN}/admin-users/`;
     const method = isEdit ? 'PUT' : 'POST';
     const body = { ...uForm };
     if (isEdit && !body.password) delete body.password;
@@ -196,7 +248,7 @@ export default function AdminDashboard() {
   const deleteUser = async (id) => {
     if (!window.confirm('Delete this user?')) return;
     try {
-      const res = await fetch(`${API}/admin/users/${id}/`, { method:'DELETE', headers: headers() });
+      const res = await fetch(`${ADMIN}/admin-users/${id}/`, { method:'DELETE', headers: headers() });
       if (!res.ok) throw new Error('Failed to delete');
       showToast('User deleted.');
       fetchAll();
@@ -207,19 +259,19 @@ export default function AdminDashboard() {
 
   const bookingAction = async (id, newStatus, notes='') => {
     try {
-      const res = await fetch(`${API}/admin/bookings/${id}/action/`, {
-        method:'PUT', 
+      const res = await fetch(`${ADMIN}/admin-bookings/${id}/`, {
+        method:'PUT',
         headers: headers(),
         body: JSON.stringify({ status:newStatus, admin_notes:notes })
       });
-      if (!res.ok) { 
-        const e = await res.json(); 
-        throw new Error(e.error || 'Failed'); 
+      if (!res.ok) {
+        const e = await res.json();
+        throw new Error(e.error || 'Failed');
       }
       showToast(`Booking marked as ${newStatus}!`);
       fetchAll();
-    } catch(e) { 
-      showToast('Error: ' + e.message, 'err'); 
+    } catch(e) {
+      showToast('Error: ' + e.message, 'err');
     }
   };
 
@@ -238,7 +290,7 @@ export default function AdminDashboard() {
         {NAV.map(n => (
           <div 
             key={n.key} 
-            className={`admin-nav ${tab===n.key?'active':''}`} 
+            className={`admin-nav ${tab===n.key?'active':''} ${n.key==='users' ? 'admin-nav-users' : ''}`} 
             onClick={()=>setTab(n.key)}
           >
             <span className="admin-icon">{n.icon}</span>
@@ -295,89 +347,102 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
-        )}
-
-        {tab==='vehicles' && (
-          <div className="admin-card">
-            <div className="admin-card-header">
+        )}        {tab==='vehicles' && (
+          <div className="admin-card">            <div className="admin-card-header">
               <h3>Vehicles <span className="admin-count">{vehicles.length}</span></h3>
-              <button className="admin-btn admin-btn-primary" onClick={openAddVehicle}>
-                + Add Vehicle
-              </button>
+              <div className="admin-actions">                <button
+                  className="admin-btn admin-btn-outline"
+                  type="button"
+                  onClick={cycleVehicleSort}
+                  title="Cycle sort order"
+                >
+                  ⇅ Sort
+                </button>
+                <button className="admin-btn admin-btn-primary" onClick={openAddVehicle}>
+                  + Add Vehicle
+                </button>
+              </div>
             </div>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Plate</th>
-                  <th>Model/Year</th>
-                  <th>Condition</th>
-                  <th>Available</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vehicles.length===0 && (
-                  <tr><td colSpan={7} className="admin-empty">No vehicles yet.</td></tr>
-                )}
-                {vehicles.map(v=>(
-                  <tr key={v.id}>
-                    <td className="admin-muted">#{v.id}</td>
-                    <td className="admin-bold">{v.name}</td>
-                    <td><code className="admin-code">{v.plate_number}</code></td>
-                    <td className="admin-muted">{v.model} {v.year}</td>
-                    <td><span className={`admin-badge ${condBadge(v.condition)}`}>{v.condition}</span></td>
-                    <td><span className={`admin-badge ${v.is_available?'b-approved':'b-rejected'}`}>{v.is_available?'Yes':'No'}</span></td>
-                    <td className="admin-actions">
-                      <button className="admin-btn admin-btn-primary" onClick={()=>openEditVehicle(v)}>Edit</button>
-                      <button className="admin-btn admin-btn-danger" onClick={()=>deleteVehicle(v.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+            <div className="admin-vehicle-grid">
+              {vehicles.length===0 && (
+                <div className="admin-empty">No vehicles yet.</div>
+              )}              {sortedVehicles.map(v => (
+                <button
+                  key={v.id}
+                  type="button"
+                  className="admin-vehicle-card"
+                  onClick={() => {
+                    setSel(v);
+                    setModal('vehicleDetails');
+                  }}
+                >
+                  <div className="admin-vehicle-media">
+                    <div className="admin-vehicle-img" aria-hidden="true" />
+                  </div>
+                  <div className="admin-vehicle-body">
+                    <div className="admin-vehicle-title-row">
+                      <div className="admin-vehicle-title">
+                        <span className="admin-bold">{v.name}</span>
+                        <span className="admin-muted-sm">#{v.id} • {v.plate_number}</span>
+                      </div>
+                      <span className={`admin-badge ${condBadge(v.condition)}`}>{v.condition}</span>
+                    </div>
+
+                    <div className="admin-vehicle-meta">
+                      <span className="admin-muted">{v.model} {v.year}</span>
+                      <span className={`admin-badge ${v.is_available ? 'b-approved' : 'b-rejected'}`}>{v.is_available ? 'Available' : 'Unavailable'}</span>
+                    </div>
+
+                    <div className="admin-vehicle-actions" onClick={(e) => e.stopPropagation()}>
+                      <button className="admin-btn admin-btn-primary" type="button" onClick={() => openEditVehicle(v)}>Edit</button>
+                      <button className="admin-btn admin-btn-danger" type="button" onClick={() => deleteVehicle(v.id)}>Delete</button>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {tab==='users' && (
-          <div className="admin-card">
+          <div className="admin-card admin-card-compact">
             <div className="admin-card-header">
               <h3>Users <span className="admin-count">{users.length}</span></h3>
               <button className="admin-btn admin-btn-primary" onClick={openAddUser}>
                 + Add User
               </button>
             </div>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Emp. ID</th>
+            <div className="admin-table-scroll">
+              <table className="admin-table">
+                <thead>                <tr>
+                  <th>ID</th>
                   <th>Username</th>
                   <th>Email</th>
                   <th>Department</th>
                   <th>Role</th>
                   <th>Actions</th>
                 </tr>
-              </thead>
-              <tbody>
-                {users.length===0 && (
-                  <tr><td colSpan={6} className="admin-empty">No users yet.</td></tr>
-                )}
-                {users.map(u=>(
-                  <tr key={u.id}>
-                    <td><code className="admin-code">{u.profile?.employee_id||'—'}</code></td>
+                </thead>
+                <tbody>
+                  {users.length===0 && (
+                    <tr><td colSpan={6} className="admin-empty">No users yet.</td></tr>
+                  )}
+                  {users.map(u=>(
+                    <tr key={u.id}>                    <td><code className="admin-code">#{u.id}</code></td>
                     <td className="admin-bold">{u.username}</td>
-                    <td className="admin-muted">{u.email}</td>
-                    <td className="admin-muted">{u.profile?.department||'—'}</td>
-                    <td><span className={`admin-badge ${u.is_staff?'b-approved':'b-ongoing'}`}>{u.is_staff?'Admin':'User'}</span></td>
-                    <td className="admin-actions">
-                      <button className="admin-btn admin-btn-primary" onClick={()=>openEditUser(u)}>Edit</button>
-                      <button className="admin-btn admin-btn-danger" onClick={()=>deleteUser(u.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <td className="admin-muted">{u.email}</td>
+                      <td className="admin-muted">{u.profile?.department||'—'}</td>
+                      <td><span className={`admin-badge ${u.is_staff?'b-approved':'b-ongoing'}`}>{u.is_staff?'Admin':'User'}</span></td>
+                      <td className="admin-actions">
+                        <button className="admin-btn admin-btn-primary" onClick={()=>openEditUser(u)}>Edit</button>
+                        <button className="admin-btn admin-btn-danger" onClick={()=>deleteUser(u.id)}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -460,8 +525,60 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        )}
-      </main>
+        )}      </main>
+
+      {/* Vehicle details modal */}
+      {modal==='vehicleDetails' && sel && (
+        <div className="admin-overlay" onClick={closeModal}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h3>Vehicle Details</h3>
+              <button className="admin-btn admin-btn-outline admin-close" onClick={closeModal}>✕</button>
+            </div>
+
+            <div className="admin-modal-body">
+              <div className="admin-vehicle-detail">
+                <div className="admin-vehicle-detail-media" aria-hidden="true" />
+                <div className="admin-vehicle-detail-info">
+                  <div className="admin-vehicle-detail-title">
+                    <div>
+                      <div className="admin-bold" style={{ fontSize: '16px' }}>{sel.name}</div>
+                      <div className="admin-muted-sm">#{sel.id} • {sel.plate_number}</div>
+                    </div>
+                    <span className={`admin-badge ${condBadge(sel.condition)}`}>{sel.condition}</span>
+                  </div>
+
+                  <div className="admin-vehicle-detail-grid">
+                    <div>
+                      <div className="admin-muted-sm">Model</div>
+                      <div className="admin-bold">{sel.model || '—'}</div>
+                    </div>
+                    <div>
+                      <div className="admin-muted-sm">Year</div>
+                      <div className="admin-bold">{sel.year || '—'}</div>
+                    </div>
+                    <div>
+                      <div className="admin-muted-sm">Availability</div>
+                      <div>
+                        <span className={`admin-badge ${sel.is_available ? 'b-approved' : 'b-rejected'}`}>{sel.is_available ? 'Available' : 'Unavailable'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="admin-vehicle-detail-actions">
+                    <button className="admin-btn admin-btn-primary" type="button" onClick={() => { setModal('editVehicle'); }}>Edit</button>
+                    <button className="admin-btn admin-btn-danger" type="button" onClick={() => { deleteVehicle(sel.id); }}>Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-modal-footer">
+              <button className="admin-btn admin-btn-outline" onClick={closeModal}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {(modal==='addVehicle'||modal==='editVehicle') && (
         <div className="admin-overlay" onClick={closeModal}>

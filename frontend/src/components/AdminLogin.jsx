@@ -96,66 +96,56 @@ const AdminLogin = () => {
           {error && <div className="error-message">{error}</div>}
 
           {/* Form Box Container */}
-          <div className="admin-form-box">
-            {/* Login Form */}
-            <form onSubmit={handleAdminLogin} className="admin-login-form">              {/* Username Input */}
+          <div className="admin-form-box">            {/* Login Form */}
+            <form onSubmit={handleAdminLogin} className="admin-login-form">
+              {/* Username Input */}
               <div className="admin-form-group">
                 <label htmlFor="admin-username" className="admin-form-label">Admin Username</label>
                 <div className="admin-input-wrapper">
-                  <div className="admin-floating-label">Enter your admin username</div>
                   <input
                     type="text"
                     id="admin-username"
                     className="admin-form-input"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}                    onFocus={(e) => {
-                      e.target.parentElement.classList.add('focused');
-                    }}
-                    onBlur={(e) => {
-                      if (!e.target.value) {
-                        e.target.parentElement.classList.remove('focused');
-                      }
-                    }}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your admin username"
                     required
                   />
                 </div>
-              </div>            {/* Password Input */}
-            <div className="admin-form-group">
-              <label htmlFor="admin-password" className="admin-form-label">Password</label>
-              <div className="admin-password-input-wrapper admin-input-wrapper">
-                <div className="admin-floating-label">Enter your password</div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="admin-password"
-                  className="admin-form-input"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={(e) => e.target.parentElement.classList.add('focused')}
-                  onBlur={(e) => {
-                    if (!e.target.value) {
-                      e.target.parentElement.classList.remove('focused');
-                    }
-                  }}
-                  required
-                />                <button
-                  type="button"
-                  className="admin-password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <svg className="admin-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                  ) : (
-                    <svg className="admin-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                    </svg>
-                  )}
-                </button>
               </div>
-            </div>
+
+              {/* Password Input */}
+              <div className="admin-form-group">
+                <label htmlFor="admin-password" className="admin-form-label">Password</label>
+                <div className="admin-password-input-wrapper admin-input-wrapper">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="admin-password"
+                    className="admin-form-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="admin-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <svg className="admin-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    ) : (
+                      <svg className="admin-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
 
             {/* Login Button */}
             <button
