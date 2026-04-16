@@ -410,14 +410,14 @@
 }
 
 .admin-btn-primary {
-  background: linear-gradient(135deg, #006205 0%, #006C35 100%);
-  color: white;
-  box-shadow: 0 8px 20px rgba(0, 98, 5, 0.25);
+  background: #fdd117;
+  color: #333;
+  box-shadow: 0 8px 20px rgba(253, 209, 23, 0.3);
 }
 
 .admin-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
+  box-shadow: 0 15px 35px rgba(253, 209, 23, 0.5);
 }
 
 .admin-btn-primary:active:not(:disabled) {

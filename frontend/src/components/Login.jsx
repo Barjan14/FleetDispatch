@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 
 const Login = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -12,11 +10,11 @@ const Login = () => {
   const [exitAnimation, setExitAnimation] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
 
-  const navigateTo = (path) => {
+  const navigateTo = (url) => {
     setExitAnimation(true);
     setTimeout(() => {
-      navigate(path);
-    }, 300);
+      window.location.href = url;
+    }, 800);
   };
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -141,22 +139,16 @@ const Login = () => {
                       }
                     }}
                     required
-                  />                  <button
+                  />
+                  <button
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? (
-                      <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                    ) : (
-                      <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                        <line x1="1" y1="1" x2="23" y2="23"/>
-                      </svg>
-                    )}
+                    <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
                   </button>
                 </div>
               </div>              {/* Remember Me & Forgot Password */}
@@ -184,6 +176,11 @@ const Login = () => {
                 type="button"
                 className="btn btn-admin"
                 onClick={() => navigateTo('/admin-login')}
+                style={{
+                  background: '#fdd117',
+                  color: '#333',
+                  boxShadow: '0 10px 25px rgba(253, 209, 23, 0.3)'
+                }}
               >
                 Log In as ADMIN
               </button>
