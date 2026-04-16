@@ -1,403 +1,362 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const [adminUser, setAdminUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalFleets: 0,
-    totalTrips: 0,
-    totalRevenue: 0,
-    activeVehicles: 0,
-    systemStatus: 'Online',
-  });
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [adminUser] = useState({ username: 'Admin User' });
   const [users, setUsers] = useState([]);
-  const [fleets, setFleets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+  const token = localStorage.getItem('token');
 
+  // Fetch users from backend
   useEffect(() => {
-    const adminToken = localStorage.getItem('adminToken');
-    const isAdmin = localStorage.getItem('isAdmin');
-
-    if (!adminToken || isAdmin !== 'true') {
-      navigate('/admin-login');
-      return;
+    if (activeTab === 'users') {
+      fetchUsers();
     }
+  }, [activeTab]);
 
-    // Fetch admin dashboard data
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/admin-dashboard/', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${adminToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8000/api/admin/users/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setAdminUser(data.admin);
-          setStats(data.stats);
-          setUsers(data.users || []);
-          setFleets(data.fleets || []);
-        } else if (response.status === 401) {
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('isAdmin');
-          navigate('/admin-login');
-        } else {
-          setError('Failed to fetch dashboard data');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setError('An error occurred while loading dashboard data');
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        console.error('Failed to fetch users');
       }
-    };
-
-    fetchDashboardData();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('isAdmin');
-    navigate('/admin-login');
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="dashboard-loading">
-        <div className="spinner"></div>
-        <p>Loading admin dashboard...</p>
-      </div>
-    );
-  }
+  const handleEditClick = (user) => {
+    setEditingUserId(user.id);
+    setEditFormData({
+      username: user.username,
+      email: user.email,
+      is_staff: user.is_staff,
+    });
+  };
+
+  const handleSaveEdit = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/admin/users/${userId}/`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUsers(users.map(u => u.id === userId ? updatedUser : u));
+        setEditingUserId(null);
+        setEditFormData({});
+      } else {
+        alert('Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Error updating user');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUserId(null);
+    setEditFormData({});
+  };
 
   return (
     <div className="admin-dashboard">
-      {/* Sidebar */}
-      <aside className="admin-sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <svg viewBox="0 0 100 100" className="sidebar-logo-svg">
-              <rect x="20" y="20" width="60" height="60" rx="5" fill="none" stroke="white" strokeWidth="3"/>
-              <circle cx="50" cy="50" r="8" fill="white"/>
-              <line x1="50" y1="30" x2="50" y2="20" stroke="white" strokeWidth="2"/>
-              <line x1="70" y1="50" x2="80" y2="50" stroke="white" strokeWidth="2"/>
-            </svg>
-          </div>
-          <h2>Admin Panel</h2>
-        </div>
+      {/* Burger Menu Button */}
+      <button 
+        className="burger-menu" 
+        aria-label="Toggle Navigation"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-        <nav className="sidebar-nav">
-          <button
-            className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            <span className="nav-icon">📊</span>
-            Overview
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            <span className="nav-icon">👥</span>
-            Users
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'fleets' ? 'active' : ''}`}
-            onClick={() => setActiveTab('fleets')}
-          >
-            <span className="nav-icon">🚗</span>
-            Fleets
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
-          >
-            <span className="nav-icon">📈</span>
-            Reports
-          </button>
-          <button
-            className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            <span className="nav-icon">⚙️</span>
-            Settings
-          </button>
-        </nav>
-
-        <div className="sidebar-footer">
-          <button className="logout-btn-sidebar" onClick={handleLogout}>
-            <span className="nav-icon">🚪</span>
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="admin-main">
-        {/* Header */}
-        <header className="admin-header">
-          <div className="header-content">
+      {/* Sidebar Navigation */}
+      <aside className="sidebar">
+        <ul className="nav-tabs">
+          <li>
+            <a 
+              href="#overview"
+              className={`${activeTab === 'overview' ? 'active' : ''}`}              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('overview');
+              }}
+            >
+              📊 Overview
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#users"
+              className={`${activeTab === 'users' ? 'active' : ''}`}              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('users');
+              }}
+            >
+              👥 Users
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#fleets"
+              className={`${activeTab === 'fleets' ? 'active' : ''}`}              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('fleets');
+              }}
+            >
+              🚗 Fleets
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#reports"
+              className={`${activeTab === 'reports' ? 'active' : ''}`}              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('reports');
+              }}
+            >
+              📈 Reports
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#settings"
+              className={`${activeTab === 'settings' ? 'active' : ''}`}              onClick={(e) => {
+                e.preventDefault();
+                setActiveTab('settings');
+              }}
+            >
+              ⚙️ Settings
+            </a>
+          </li>
+        </ul>
+      </aside>      {/* Main Content */}
+      <main className="dashboard-content">        {/* Header */}
+        <header className="dashboard-header">
+          <div className="header-left">
             <h1>Admin Dashboard</h1>
-            <div className="header-info">
-              <span className="admin-name">{adminUser?.username || 'Admin'}</span>
-              <span className="system-status" style={{ color: stats.systemStatus === 'Online' ? '#67c442' : '#ff6b6b' }}>
-                ● {stats.systemStatus}
-              </span>
+            <p className="header-subtitle">
+              {activeTab === 'overview' && 'System Overview & Statistics'}
+              {activeTab === 'users' && 'User Management'}
+              {activeTab === 'fleets' && 'Fleet Management'}
+              {activeTab === 'reports' && 'System Reports'}
+              {activeTab === 'settings' && 'System Settings'}
+            </p>
+          </div>
+          <div className="header-right">
+            <div 
+              className={`profile-dropdown ${showProfileMenu ? 'open' : ''}`}
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+            >
+              <div className="profile-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div className="admin-name">
+                <span className="admin-name-text">ADMIN</span>
+                <span className="admin-badge">ADMIN</span>
+              </div>
+              <span className="dropdown-arrow">▼</span>
+              
+              <div className="dropdown-menu">
+                <a href="#profile" className="dropdown-item" onClick={(e) => e.preventDefault()}>✏️ Profile</a>
+                <a href="#settings" className="dropdown-item" onClick={(e) => e.preventDefault()}>⚙️ Settings</a>
+                <a href="#logout" className="dropdown-item logout" onClick={(e) => e.preventDefault()}>🚪 Logout</a>
+              </div>
             </div>
           </div>
-        </header>
-
-        {/* Content Area */}
-        <div className="admin-content">
-          {error && <div className="error-banner">{error}</div>}
-
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <section className="tab-content">
-              <h2>System Overview</h2>
-
-              {/* Stats Grid */}
+        </header>        {/* Tab Content */}
+        <div className="stats-section">          {activeTab === 'overview' && (
+            <div>
               <div className="stats-grid">
-                <div className="stat-card-admin">
-                  <div className="stat-icon">👥</div>
-                  <div className="stat-info">
-                    <h3>Total Users</h3>
-                    <p className="stat-number">{stats.totalUsers}</p>
-                  </div>
+                <div className="stat-card">
+                  <div className="stat-label">Total Users</div>
+                  <div className="stat-value">1,234</div>
+                  <div className="stat-change positive">+12% from last month</div>
                 </div>
-
-                <div className="stat-card-admin">
-                  <div className="stat-icon">🚗</div>
-                  <div className="stat-info">
-                    <h3>Total Fleets</h3>
-                    <p className="stat-number">{stats.totalFleets}</p>
-                  </div>
+                <div className="stat-card">
+                  <div className="stat-label">Total Vehicles</div>
+                  <div className="stat-value">567</div>
+                  <div className="stat-change positive">+5% from last month</div>
                 </div>
-
-                <div className="stat-card-admin">
-                  <div className="stat-icon">📊</div>
-                  <div className="stat-info">
-                    <h3>Total Trips</h3>
-                    <p className="stat-number">{stats.totalTrips}</p>
-                  </div>
+                <div className="stat-card">
+                  <div className="stat-label">Total Fleets</div>
+                  <div className="stat-value">42</div>
+                  <div className="stat-change negative">-2% from last month</div>
                 </div>
-
-                <div className="stat-card-admin">
-                  <div className="stat-icon">💰</div>
-                  <div className="stat-info">
-                    <h3>Total Revenue</h3>
-                    <p className="stat-number">${stats.totalRevenue}</p>
-                  </div>
-                </div>
-
-                <div className="stat-card-admin">
-                  <div className="stat-icon">🟢</div>
-                  <div className="stat-info">
-                    <h3>Active Vehicles</h3>
-                    <p className="stat-number">{stats.activeVehicles}</p>
-                  </div>
-                </div>
-
-                <div className="stat-card-admin">
-                  <div className="stat-icon">✅</div>
-                  <div className="stat-info">
-                    <h3>System Status</h3>
-                    <p className="stat-number">{stats.systemStatus}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="quick-actions-admin">
-                <h3>Quick Actions</h3>
-                <div className="action-grid">
-                  <button className="action-card">
-                    <span className="action-icon">➕</span>
-                    <span>Add User</span>
-                  </button>
-                  <button className="action-card">
-                    <span className="action-icon">🚗</span>
-                    <span>Add Fleet</span>
-                  </button>
-                  <button className="action-card">
-                    <span className="action-icon">📊</span>
-                    <span>Generate Report</span>
-                  </button>
-                  <button className="action-card">
-                    <span className="action-icon">⚡</span>
-                    <span>System Check</span>
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Users Tab */}
-          {activeTab === 'users' && (
-            <section className="tab-content">
-              <div className="tab-header">
-                <h2>User Management</h2>
-                <button className="btn-add">+ Add User</button>
-              </div>
-
-              <div className="table-container">
-                <table className="data-table">
+                <div className="stat-card">
+                  <div className="stat-label">Total Bookings</div>
+                  <div className="stat-value">892</div>
+                  <div className="stat-change positive">+18% from last month</div>
+                </div>              </div>
+            </div>
+          )}          {activeTab === 'users' && (
+            <div className="data-table-section">
+              {loading ? (
+                <p style={{ textAlign: 'center', padding: '20px' }}>Loading users...</p>
+              ) : users.length === 0 ? (
+                <p style={{ textAlign: 'center', padding: '20px' }}>No users found</p>
+              ) : (
+                <table>
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Username</th>
-                      <th>Email</th>
-                      <th>Created</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.length > 0 ? (
-                      users.map((user, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>{user.username || 'N/A'}</td>
-                          <td>{user.email || 'N/A'}</td>
-                          <td>{user.created_at || 'N/A'}</td>
-                          <td>
-                            <button className="action-btn-table">Edit</button>
-                            <button className="action-btn-table delete">Delete</button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="no-data">No users found</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
-          {/* Fleets Tab */}
-          {activeTab === 'fleets' && (
-            <section className="tab-content">
-              <div className="tab-header">
-                <h2>Fleet Management</h2>
-                <button className="btn-add">+ Add Fleet</button>
-              </div>
-
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Fleet ID</th>
                       <th>Name</th>
-                      <th>Owner</th>
-                      <th>Vehicles</th>
+                      <th>Email</th>
+                      <th>Role</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {fleets.length > 0 ? (
-                      fleets.map((fleet, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>{fleet.name || 'N/A'}</td>
-                          <td>{fleet.owner || 'N/A'}</td>
-                          <td>{fleet.vehicle_count || 0}</td>
-                          <td><span className="status-badge active">Active</span></td>
-                          <td>
-                            <button className="action-btn-table">View</button>
-                            <button className="action-btn-table delete">Delete</button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="no-data">No fleets found</td>
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td>{user.id}</td>
+                        <td>
+                          {editingUserId === user.id ? (
+                            <input
+                              type="text"
+                              value={editFormData.username}
+                              onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+                              className="edit-input"
+                            />
+                          ) : (
+                            user.username
+                          )}
+                        </td>
+                        <td>
+                          {editingUserId === user.id ? (
+                            <input
+                              type="email"
+                              value={editFormData.email}
+                              onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                              className="edit-input"
+                            />
+                          ) : (
+                            user.email
+                          )}
+                        </td>
+                        <td>
+                          {editingUserId === user.id ? (
+                            <select
+                              value={editFormData.is_staff ? 'Staff' : 'User'}
+                              onChange={(e) => setEditFormData({ ...editFormData, is_staff: e.target.value === 'Staff' })}
+                              className="edit-select"
+                            >
+                              <option value="User">User</option>
+                              <option value="Staff">Staff</option>
+                            </select>
+                          ) : (
+                            user.is_staff ? 'Staff' : 'User'
+                          )}
+                        </td>
+                        <td>
+                          <span className={`status-badge ${user.is_staff ? 'active' : 'inactive'}`}>
+                            {user.is_staff ? '● Active' : '○ Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          {editingUserId === user.id ? (
+                            <div className="edit-actions">
+                              <button
+                                className="btn-save"
+                                onClick={() => handleSaveEdit(user.id)}
+                              >
+                                Save
+                              </button>
+                              <button
+                                className="btn-cancel"
+                                onClick={handleCancelEdit}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              className="btn-edit"
+                              onClick={() => handleEditClick(user)}
+                            >
+                              ✏️ Edit
+                            </button>
+                          )}
+                        </td>
                       </tr>
-                    )}
+                    ))}
                   </tbody>
                 </table>
-              </div>
-            </section>
-          )}
-
-          {/* Reports Tab */}
-          {activeTab === 'reports' && (
-            <section className="tab-content">
-              <h2>System Reports</h2>
-              <div className="reports-container">
-                <div className="report-card">
-                  <h3>📈 Monthly Revenue Report</h3>
-                  <p>Generate and view monthly revenue analytics</p>
-                  <button className="btn-report">Generate Report</button>
-                </div>
-                <div className="report-card">
-                  <h3>🚗 Fleet Usage Report</h3>
-                  <p>Detailed fleet usage and vehicle statistics</p>
-                  <button className="btn-report">Generate Report</button>
-                </div>
-                <div className="report-card">
-                  <h3>👥 User Activity Report</h3>
-                  <p>User engagement and activity logs</p>
-                  <button className="btn-report">Generate Report</button>
-                </div>
-                <div className="report-card">
-                  <h3>⛽ Fuel Efficiency Report</h3>
-                  <p>Fuel consumption and efficiency metrics</p>
-                  <button className="btn-report">Generate Report</button>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === 'settings' && (
-            <section className="tab-content">
-              <h2>System Settings</h2>
-              <div className="settings-container">
-                <div className="settings-section">
-                  <h3>General Settings</h3>
-                  <div className="settings-item">
-                    <label>Application Name</label>
-                    <input type="text" defaultValue="Fleet Dispatch" />
-                  </div>
-                  <div className="settings-item">
-                    <label>Support Email</label>
-                    <input type="email" defaultValue="support@fleetdispatch.com" />
-                  </div>
-                  <button className="btn-save">Save Changes</button>
-                </div>
-
-                <div className="settings-section">
-                  <h3>Security Settings</h3>
-                  <div className="settings-item">
-                    <label>Session Timeout (minutes)</label>
-                    <input type="number" defaultValue="30" />
-                  </div>
-                  <div className="settings-item">
-                    <label>Max Login Attempts</label>
-                    <input type="number" defaultValue="5" />
-                  </div>
-                  <button className="btn-save">Save Changes</button>
-                </div>
-
-                <div className="settings-section danger">
-                  <h3>Danger Zone</h3>
-                  <p>Be careful with these actions</p>
-                  <button className="btn-danger">Clear Cache</button>
-                  <button className="btn-danger">System Reset</button>
-                </div>
-              </div>
-            </section>
+              )}
+            </div>
+          )}{activeTab === 'fleets' && (
+            <div className="data-table-section">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fleet ID</th>
+                    <th>Fleet Name</th>
+                    <th>Vehicles</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>F001</td>
+                    <td>Fleet Alpha</td>
+                    <td>15</td>
+                    <td><span className="status">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td>F002</td>
+                    <td>Fleet Beta</td>
+                    <td>22</td>
+                    <td><span className="status">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td>F003</td>
+                    <td>Fleet Gamma</td>
+                    <td>18</td>
+                    <td><span className="status">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td>F004</td>
+                    <td>Fleet Delta</td>
+                    <td>25</td>
+                    <td><span className="status">Active</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}          {activeTab === 'reports' && (
+            <div className="data-table-section">
+              <p style={{ padding: '20px', color: '#666' }}>Reports section content here</p>
+            </div>
+          )}          {activeTab === 'settings' && (
+            <div className="data-table-section">
+              <p style={{ padding: '20px', color: '#666' }}>Settings section content here</p>
+            </div>
           )}
         </div>
       </main>
