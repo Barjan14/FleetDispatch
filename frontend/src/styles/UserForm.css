@@ -3,23 +3,23 @@
    ========================================================= */
 :root {
   /* Primary Brand Colors */
-  --primary-dark: #134e33;     /* Deep green for header and hover states */
-  --primary: #1f7a4d;          /* Main green */
-  --primary-light: #2f9e6f;    /* Accent green */
-  --accent-success: #4caf50;   /* Success indicator */
+  --primary-dark: #134e33;
+  --primary: #1f7a4d;
+  --primary-light: #2f9e6f;
+  --accent-success: #4caf50;
 
   /* Backgrounds */
-  --bg-light: #f8faf9;         /* Soft background for sections */
+  --bg-light: #f8faf9;
   --bg-white: #ffffff;
 
   /* Borders */
-  --border: #d1d5db;           /* Stronger border for clarity */
+  --border: #d1d5db;
 
   /* Text Colors */
-  --text-dark: #0f172a;        /* Main readable text */
-  --text-label: #1f2937;       /* Labels */
-  --text-muted: #4b5563;       /* Secondary text */
-  --text-on-primary: #ffffff;  /* Text on dark backgrounds */
+  --text-dark: #0f172a;
+  --text-label: #1f2937;
+  --text-muted: #4b5563;
+  --text-on-primary: #ffffff;
 
   /* Status Colors */
   --success-bg: #e8f5e9;
@@ -67,7 +67,7 @@
 .fd-header {
   display: flex;
   align-items: center;
-  justify-content: center; /* centers the whole group */
+  justify-content: center;
   gap: 14px;
   padding: 1.25rem 1.5rem;
   background: linear-gradient(
@@ -76,7 +76,7 @@
     var(--primary) 50%,
     var(--primary-light) 100%
   );
-  position: relative; /* IMPORTANT for badge positioning */
+  position: relative;
 }
 
 .fd-header-group {
@@ -108,6 +108,70 @@
   color: rgba(255, 255, 255, 0.85);
   margin-top: 2px;
   font-family: monospace;
+}
+
+/* =========================================================
+   STEP PROGRESS INDICATOR
+   ========================================================= */
+.step-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.step.active .step-circle {
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+
+.step.completed .step-circle {
+  background: var(--accent-success);
+  color: var(--text-on-primary);
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.step.active .step-label {
+  color: var(--primary-dark);
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: var(--border);
+}
+
+.step.completed + .step-line {
+  background: var(--accent-success);
 }
 
 /* =========================================================
@@ -164,6 +228,21 @@
   gap: 20px;
   padding: 1.5rem;
   background: var(--bg-white);
+}
+
+.fd-body section {
+  animation: fadeStep 0.25s ease;
+}
+
+@keyframes fadeStep {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================================================
@@ -251,121 +330,6 @@ textarea:focus {
   background: var(--bg-white);
 }
 
-textarea {
-  resize: vertical;
-  min-height: 80px;
-  line-height: 1.5;
-}
-
-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 30px;
-  cursor: pointer;
-}
-
-/* =========================================================
-   ROUTE INDICATOR
-   ========================================================= */
-.route-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dot--origin {
-  background: var(--primary-light);
-}
-
-.dot--dest {
-  background: #ef4444; /* Red retained for destination clarity */
-}
-
-.route-label {
-  font-size: 11px;
-  font-family: monospace;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.route-line {
-  flex: 1;
-  background: var(--border);
-}
-
-/* =========================================================
-   VERIFICATION BOX
-   ========================================================= */
-.verify-box {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 1rem 1.25rem;
-  background: var(--bg-light);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
-
-.verify-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-label);
-}
-
-.check-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
-
-.check-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary);
-  flex-shrink: 0;
-}
-
-.check-label {
-  font-size: 13px;
-  color: var(--text-label);
-  transition: color 0.15s;
-}
-
-.check-label--done {
-  color: var(--primary);
-  text-decoration: line-through;
-  text-decoration-color: rgba(76, 175, 80, 0.5);
-}
-
-/* =========================================================
-   SIGNATURE AREA
-   ========================================================= */
-.sig-area {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 1rem;
-  min-height: 56px;
-  background: var(--bg-white);
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-  font-size: 12px;
-  font-family: monospace;
-  color: var(--text-muted);
-}
-
 /* =========================================================
    FOOTER
    ========================================================= */
@@ -376,11 +340,20 @@ select {
   padding: 1rem 1.5rem;
   background: var(--bg-light);
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
 }
 
 .footer-right {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* =========================================================
@@ -395,18 +368,21 @@ select {
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 0.15s, color 0.15s, transform 0.1s, opacity 0.15s;
+  width: auto;
+  white-space: nowrap;
 }
 
 .btn:active {
   transform: scale(0.97);
 }
 
-.btn--ghost {
+.btn--back {
   background: transparent;
   color: var(--text-muted);
+  min-width: 100px;
 }
 
-.btn--ghost:hover {
+.btn--back:hover {
   color: var(--primary-dark);
   background: rgba(31, 122, 77, 0.08);
 }
@@ -432,18 +408,82 @@ select {
   background: var(--primary-dark);
 }
 
-.btn--disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none;
+/* =========================================================
+   SUMMARY DISPATCH (ADDED)
+   ========================================================= */
+.summary-card {
+  margin: 1rem 1.5rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-white);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s ease;
+}
+
+.summary-card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 12px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.summary-grid p {
+  margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+@media (max-width: 600px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================================================
-   FOOTER HINT
+   RESPONSIVE IMPROVEMENTS
    ========================================================= */
-.form-hint {
-  font-size: 12px;
-  font-family: monospace;
-  color: var(--text-muted);
-  text-align: center;
+@media (max-width: 768px) {
+  .fd-header-text h1 {
+    font-size: 15px;
+  }
+
+  .fd-header-text p {
+    font-size: 11px;
+  }
+
+  .btn--primary,
+  .btn--outline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .btn--back {
+    width: auto;
+    min-width: 100px;
+  }
+
+  .footer-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
