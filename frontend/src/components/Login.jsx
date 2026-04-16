@@ -91,9 +91,10 @@ const Login = () => {
                   <line x1="65" y1="50" x2="75" y2="40" stroke="white" strokeWidth="2"/>
                 </svg>
               </div>
-            </div>
-            <h1 className="logo-text">FLEET DISPATCH</h1>
-            <p className="header-subtitle">Please enter your details</p>
+            </div>            <h1 className="logo-text">FLEET DISPATCH</h1>
+            <p className="header-subtitle">
+              {email || password ? 'Ready to proceed?' : 'Please enter your details'}
+            </p>
           </div>
 
           {/* Form Box Container */}
@@ -103,41 +104,28 @@ const Login = () => {
               <div className="form-group">
                 <label htmlFor="email" className="form-label">Email</label>
                 <div className="input-wrapper">
-                  <div className="floating-label">Enter your email or username</div>                  <input
+                  <input
                     type="text"
                     id="email"
                     className="form-input"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    onFocus={(e) => {
-                      e.target.parentElement.classList.add('focused');
-                    }}
-                    onBlur={(e) => {
-                      if (!e.target.value) {
-                        e.target.parentElement.classList.remove('focused');
-                      }
-                    }}
+                    placeholder="Enter your email or username"
                     required
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
-              <div className="form-group">
+              {/* Password Input */}              <div className="form-group">
                 <label htmlFor="password" className="form-label">Password</label>
                 <div className="password-input-wrapper input-wrapper">
-                  <div className="floating-label">Enter your password</div>                  <input
+                  <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
                     className="form-input"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onFocus={(e) => e.target.parentElement.classList.add('focused')}
-                    onBlur={(e) => {
-                      if (!e.target.value) {
-                        e.target.parentElement.classList.remove('focused');
-                      }
-                    }}
+                    placeholder="Enter your password"
                     required
                   />
                   <button
@@ -145,10 +133,17 @@ const Login = () => {
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
-                    </svg>
+                    {showPassword ? (
+                      <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    ) : (
+                      <svg className="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>              {/* Remember Me & Forgot Password */}

@@ -372,7 +372,7 @@
   cursor: pointer;
   padding: 8px;
   color: #666;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,12 +381,18 @@
 
 .admin-password-toggle:hover {
   color: #2d8659;
+  transform: scale(1.1);
+}
+
+.admin-password-toggle:active {
+  transform: scale(0.95);
 }
 
 .admin-eye-icon {
   width: 20px;
   height: 20px;
   stroke-width: 1.5;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Buttons */
