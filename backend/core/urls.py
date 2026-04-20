@@ -9,6 +9,8 @@ from core.views import (
     admin_bookings, admin_booking_action,
     check_vehicle_availability,
 )
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('api/login/',                                jwt_login,                  name='api_login'),
@@ -22,4 +24,4 @@ urlpatterns = [
     path('api/admin-fleets/',                         admin_fleets,               name='api_admin_fleets'),
     path('api/admin-bookings/',                       admin_bookings,             name='api_admin_bookings'),
     path('api/admin-bookings/<int:id>/',              admin_booking_action,       name='api_admin_booking_action'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
