@@ -15,33 +15,32 @@
 
 /* Scoped styles to prevent conflicts with AdminDashboard.v2.css */
 .admin-login-container .admin-btn {
-  padding: 10px 20px;
+  padding: 14px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: inherit;
-  margin-top: 10px;
+  margin-top: 12px;
   width: 100%;
 }
 
 .admin-login-container .admin-btn-primary {
-  background: #fdd117;
-  color: #333;
-  box-shadow: 0 8px 20px rgba(253, 209, 23, 0.3);
+  background: linear-gradient(135deg, #006205 0%, #004a1f 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 98, 5, 0.25);
 }
 
 .admin-login-container .admin-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(253, 209, 23, 0.5);
+  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
 }
 
 .admin-login-container .admin-btn-primary:active:not(:disabled) {
@@ -54,16 +53,19 @@
 }
 
 .admin-login-container .admin-btn-back {
-  background: #f0f0f0;
-  color: #666;
-  border: 1px solid #e0e0e0;
+  background: #fdd117;
+  color: #333;
+  box-shadow: 0 10px 25px rgba(253, 209, 23, 0.3);
   margin-top: 12px;
 }
 
 .admin-login-container .admin-btn-back:hover {
-  background: #e8e8e8;
-  border-color: #d0d0d0;
   transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(253, 209, 23, 0.5);
+}
+
+.admin-login-container .admin-btn-back:active {
+  transform: translateY(0);
 }
 
 .admin-login-container .admin-form-group {

@@ -449,6 +449,41 @@ font-size: 12px;
   transform: translateY(0);
 }
 
+/* Request Form Button */
+.btn-request {
+  background: linear-gradient(135deg, #006205 0%, #004a1f 100%);
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 98, 5, 0.25);
+}
+
+.btn-request:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 98, 5, 0.4);
+}
+
+.btn-request:active {
+  transform: translateY(0);
+}
+
+/* Buttons Container for Login Options */
+.login-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.login-buttons-container .btn {
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
 /* Responsive Design - Tablet */
 @media (max-width: 1024px) {
   .login-form-container {
