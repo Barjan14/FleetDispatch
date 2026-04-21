@@ -91,8 +91,8 @@ export default function DispatchForm() {
   const today = new Date().toISOString().split('T')[0]
 
   const [step, setStep] = useState(1)
-
   const [form, setForm] = useState({
+    email: '',
     employeeName: '',
     department: '',
     requestDate: today,
@@ -115,11 +115,11 @@ export default function DispatchForm() {
     setForm(f => ({ ...f, [key]: val }))
     setErrors(e => ({ ...e, [key]: '' }))
   }
-
   const validateStep = () => {
     let newErrors = {}
-
+    
     if (step === 1) {
+      if (!form.email) newErrors.email = 'Your email is required'
       if (!form.employeeName) newErrors.employeeName = 'Your name is required'
       if (!form.department) newErrors.department = 'Please select your department'
     }
@@ -137,8 +137,8 @@ export default function DispatchForm() {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-
   const canSubmit =
+    form.email &&
     form.employeeName &&
     form.requestDate &&
     form.destination
@@ -154,9 +154,9 @@ export default function DispatchForm() {
     setSubmitted(true)
     setShowSummary(true)
   }
-
   function handleReset() {
     setForm({
+      email: '',
       employeeName: '',
       department: '',
       requestDate: today,
@@ -230,8 +230,11 @@ export default function DispatchForm() {
             <div className="fd-summary-header">
               <h2>Request Summary</h2>
               <span className="fd-ref">REF: REQ-{Date.now().toString().slice(-6)}</span>
-            </div>
-            <div className="fd-summary-grid">
+            </div>            <div className="fd-summary-grid">
+              <div className="fd-summary-item">
+                <span className="fd-summary-label">Email Address</span>
+                <span className="fd-summary-value">{form.email}</span>
+              </div>
               <div className="fd-summary-item">
                 <span className="fd-summary-label">Employee Name</span>
                 <span className="fd-summary-value">{form.employeeName}</span>
@@ -291,8 +294,7 @@ export default function DispatchForm() {
         {/* FORM CONTENT */}
         {!showSummary && (
           <div className="fd-form-content">
-            
-            {/* STEP 1: Employee Info */}
+              {/* STEP 1: Employee Info */}
             {step === 1 && (
               <div className="fd-section">
                 <div className="fd-section-header">
@@ -301,6 +303,18 @@ export default function DispatchForm() {
                 </div>
                 
                 <div className="fd-form-grid">
+                  <div className="fd-field">
+                    <label>Email Address</label>
+                    <input 
+                      type="email"
+                      value={form.email}
+                      onChange={e => set('email', e.target.value)}
+                      placeholder="Enter your email address"
+                      className={errors.email ? 'error' : ''}
+                    />
+                    {errors.email && <span className="fd-error">{errors.email}</span>}
+                  </div>
+
                   <div className="fd-field">
                     <label>Employee Name</label>
                     <input 
@@ -450,11 +464,17 @@ export default function DispatchForm() {
             )}
 
           </div>
-        )}
-
-        {/* FOOTER */}
+        )}        {/* FOOTER */}
         {!showSummary && (
           <footer className="fd-footer-modern">
+            <button 
+              className="fd-reset-circle"
+              onClick={handleReset}
+              title="Reset form"
+            >
+              ↺
+            </button>
+
             <button 
               className="fd-btn fd-btn-ghost"
               onClick={() => setStep(s => Math.max(1, s - 1))}
@@ -465,11 +485,6 @@ export default function DispatchForm() {
             </button>
 
             <div className="fd-footer-actions">
-              <button className="fd-btn fd-btn-outline" onClick={handleReset}>
-                <ResetIcon />
-                Reset
-              </button>
-
               {step < 3 && (
                 <button className="fd-btn fd-btn-primary" onClick={handleNext}>
                   Next
